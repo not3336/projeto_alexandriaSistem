@@ -40,10 +40,37 @@ class AutorController:
 			return {'type':"Error", 'title':"Erro ao buscar autores", 'message': [str(e)]}
 
 	@staticmethod
+	def getAutorById(id):
+		try:
+			autor = AutorModel.get_or_none(AutorModel.id == id)
+			if autor == None:
+				return {'type':"Warning", 'title':"Autor não existe", 'message':"Nenhum Autor associada ao ID informado"}
+			return {'type':"Success", 'autor':autor}
+		except Exception as e:
+			return {'type':"Error", 'title':"Ocorreu um erro ao consultar autor", 'message': [str(e)]}
+	@staticmethod
 	def deleteAutor(id):
 		try:
-			autor = AutorModel.get(AutorModel.id == id)
+			autor = AutorModel.get_or_none(AutorModel.id == id)
+			if autor == None:
+				return {'type':"Warning", 'title':"Autor não existe", 'message':"Nenhum Autor associada ao ID informado"}
 			autor.delete_instance()
-			return True
+			return {'type':"Success", 'title':"Sucesso ao excluir autor", 'message':"Autor deletado com sucesso"}
 		except Exception as e:
-			return False
+			return {'type':"Error", 'title':"Ocorrreu um erro ao deletar autor", 'message': [str(e)]}
+
+	@staticmethod
+	def updateAutor(id, autorUpdate):
+		try:
+			autor = AutorModel.get_or_none(AutorModel.id == id)
+			if autor == None:
+				return {'type':"Warning", 'title':"Autor não existe", 'message':"Nenhum Autor associada ao ID informado"}
+			if not isinstance(autorUpdate, AutorModel):
+				return {'type':"Warning", 'title':"Ocorreu uma incosistência nos dados", 'message':"Não foram informados todos os dados do autor"}
+			if len(AutorModel.select().where(AutorModel.nome == autorUpdate.nome)) > 0:
+				return {'type':"Warning", 'title':"Nome de autor já existe", 'message':"Já existe um autor com esse mesmo nome."}
+			autorUpdate.save()
+			return {'type':"Success", 'title':"Autor alterado com sucesso", 'message':"Os dados do autor foram atualizados."}
+		except Exception as e:
+			return {'type':"Error", 'title':"Ocorrreu um erro ao atualizar informações do autor", 'message': [str(e)]}
+
