@@ -14,8 +14,21 @@ def insertAutorTest():
 	print(response)
 #OK
 def getAllAutoresTest():
-	autores = AutorController.getAllAutores()
+	response = AutorController.getAllAutores()
+	autores = response['autores']
 	for autor in autores:
-		print(f"Nome:{autor.nome}, Data_Nasc: {autor.data_nasc}, Nacionalidade: {autor.nacionalidade}.")
+		print(f"ID: {autor.id}, Nome:{autor.nome}, Data_Nasc: {autor.data_nasc}, Nacionalidade: {autor.nacionalidade}.")
+def deleteAutorTest():
+	response = AutorController.deleteAutor(8)
+	print(response)
+
+def updateAutorTest():
+	response = AutorController.getAutorById(1)
+	autorUpdate = response['autor']
+	autorUpdate.nome = "Nieli de Jesus Mota Neres"
+
+	response = AutorController.updateAutor(2, autorUpdate)
+	print(response)
 
 getAllAutoresTest()
+#updateAutorTest()
