@@ -1,6 +1,8 @@
 from models.AutorModel import AutorModel
 from datetime import datetime
+
 class AutorController:
+
 	@staticmethod
 	def createAutor(nome, dataNascimento, nacionalidade):
 		warnings = []
@@ -33,6 +35,15 @@ class AutorController:
 	def getAllAutores():
 		try:
 			autores = AutorModel.select()
-			return autores
+			return {'type':"Success", 'autores':autores}
 		except Exception as e:
-			pass
+			return {'type':"Error", 'title':"Erro ao buscar autores", 'message': [str(e)]}
+
+	@staticmethod
+	def deleteAutor(id):
+		try:
+			autor = AutorModel.get(AutorModel.id == id)
+			autor.delete_instance()
+			return True
+		except Exception as e:
+			return False

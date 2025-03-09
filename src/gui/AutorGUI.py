@@ -47,7 +47,11 @@ class AutorGUI(ctk.CTkToplevel):
 
     def _loadAutores(self):
         try:
-            self.autores = AutorController.getAllAutores()
+            response = AutorController.getAllAutores()
+            if response['type'] == 'Success':
+                self.autores = response['autores']
+            else:
+                AlertWidget(self.root, response['type'], response['title'], "\n".join(response['message']))                
         except Exception as e:
             AlertWidget(self.root, 'Error', "Erro ao carregar usuarios", str(e))
 

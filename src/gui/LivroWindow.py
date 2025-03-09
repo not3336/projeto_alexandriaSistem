@@ -1,10 +1,13 @@
 import customtkinter as ctk
 from gui.AutorGUI import AutorGUI
+from widgets.AlertWidget import AlertWidget
+from controllers.AutorController import AutorController
 
 class LivroWindow(ctk.CTkFrame):
     def __init__(self, master, root):
         super().__init__(master)
         self.root = root
+        self.autores = []
         self._configWindow()
         self._createWidgets()
         self._loadWidgets()
@@ -71,9 +74,12 @@ class LivroWindow(ctk.CTkFrame):
     
     def _loadRegisterLivro(self):
         
-        def cleanFields(*fields):
-            for f in fields:
-                f.delete(0, 'end')
+        def cleanFields():
+            self.entryTitulo.delete(0, 'end')
+            self.entryQuantCopias.delete(0, 'end')
+            self.entryQuantDisponivel.delete(0, 'end')
+            self.cbAutor.set("")
+            self.cbGenero.set("")
            
         def filterEstoqueEntry(event):
             vk = event.keysym
@@ -88,6 +94,16 @@ class LivroWindow(ctk.CTkFrame):
                 except IndexError:
                     pass
             
+        def _loadAutores():
+            try:
+                response = AutorController.getAllAutores()
+                if response['type'] == "Success":
+                    self.autores = response['autores']
+                else:
+                    AlertWidget(self.root, response['type'], response['title'], "\n".join(response['message']))
+            except Exception as e:
+                AlertWidget(self.root, "Error", "Erro ao tentar consultar autores", str(e))
+
         self._cleanContentFrame()
         self.frRegister = ctk.CTkFrame(self.frContent, fg_color='transparent')
         frLivroData = ctk.CTkFrame(self.frRegister, fg_color='transparent', border_color='black', border_width=1)
@@ -106,8 +122,10 @@ class LivroWindow(ctk.CTkFrame):
         lbQuantCopias = ctk.CTkLabel(frDataRow2, text="Quant. Copias: ", **configLabelData)
         lbQuantDisponivel = ctk.CTkLabel(frDataRow2, text="Quant. Disponível: ", **configLabelData)
         
+        _loadAutores()
+
         self.entryTitulo = ctk.CTkEntry(frDataRow1, **configEntryData)
-        self.cbAutor = ctk.CTkComboBox(frDataRow2, state="readonly", **configEntryData)
+        self.cbAutor = ctk.CTkComboBox(frDataRow2, state="readonly", values=[autor.nome for autor in self.autores], **configEntryData)
         self.cbGenero = ctk.CTkComboBox(frDataRow1, state="readonly", **configEntryData)
         self.entryQuantCopias = ctk.CTkEntry(frDataRow2, width=40, **configEntryData)
         self.entryQuantDisponivel = ctk.CTkEntry(frDataRow2, width=40,**configEntryData)
@@ -122,9 +140,7 @@ class LivroWindow(ctk.CTkFrame):
         self.entryQuantDisponivel.bind('<KeyRelease>', filterEstoqueEntry)
         
         btRegister = ctk.CTkButton(frButtons, text="Cadastrar", **confButtonCad)
-        btCleanFields = ctk.CTkButton(frButtons, text="Limpar Campos", **confButtonCad,
-            command= lambda : cleanFields(self.entryTitulo, self.cbAutor, self.cbGenero, self.entryQuantCopias,
-                                          self.entryQuantDisponivel))
+        btCleanFields = ctk.CTkButton(frButtons, text="Limpar Campos", **confButtonCad, command=cleanFields)
 
         self.frRegister.pack(fill='both', expand=True)
         ctk.CTkLabel(self.frRegister, text="Ficha de Cadastro", font=("", 18), text_color="black").pack(padx=5, pady=10, anchor='w')
