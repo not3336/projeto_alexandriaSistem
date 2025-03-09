@@ -57,6 +57,16 @@ class AutorGUI(ctk.CTkToplevel):
 
 
     def _loadListAutoresFrame(self):
+
+        def _deleteAutor(id):
+            response = AutorController.deleteAutor(id)
+            typeAlert, title, message = response.values()
+            AlertWidget(self.root, typeAlert, title, message)
+            if typeAlert == "Success":
+                self.autores = list(filter(lambda autor: autor.id != id, self.autores))
+                self._loadListAutoresFrame()
+
+
         self._cleanContentFrame()
 
         self.frTableLivros = ctk.CTkFrame(self.frContent, fg_color="#ced4da", corner_radius=0)
@@ -87,7 +97,7 @@ class AutorGUI(ctk.CTkToplevel):
                 ctk.CTkLabel(self.frTableLivros, text=autor.nome, **configLabelRow).grid(row=row+1, column=1)
                 ctk.CTkLabel(self.frTableLivros, text=autor.data_nasc, **configLabelRow).grid(row=row+1, column=2)
                 ctk.CTkLabel(self.frTableLivros, text=autor.nacionalidade, **configLabelRow).grid(row=row+1, column=3)
-                ctk.CTkButton(self.frTableLivros, text="Excluir").grid(row=row+1, column=4)
+                ctk.CTkButton(self.frTableLivros, text="Excluir", command=lambda: _deleteAutor(autor.id)).grid(row=row+1, column=4)
         else:
             ctk.CTkLabel(self.frTableLivros, text="Nenhum Autor Cadastrado").grid(row=1, column=0, columnspan=4, sticky="we")
     
