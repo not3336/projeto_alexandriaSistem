@@ -3,23 +3,31 @@ from gui.AutorGUI import AutorGUI
 from widgets.AlertWidget import AlertWidget
 from controllers.AutorController import AutorController
 
+#Essa classe é responsavél por exibir e gerenciar os livros da Bibliotéca
+#Optei por utilizar Frames no lugar de Toplevel, pois o sistema irá rodar quase tudo no CTk root
 class LivroWindow(ctk.CTkFrame):
     def __init__(self, master, root):
         super().__init__(master)
+        #Salva a referência a tela CTk root
         self.root = root
+        #Armazena os autores que serão exibidos no ComboBox
         self.autores = []
         self._configWindow()
         self._createWidgets()
         self._loadWidgets()
         
     def _configWindow(self):
+        #Deixa o frame transparent e com bordas quadradas
         self.configure(fg_color="transparent")
         self.configure(bg_color="transparent")
         self.configure(corner_radius=0)
         
     def _createWidgets(self):
+        #Frames principal
         self.frMain = ctk.CTkFrame(self, fg_color='transparent', corner_radius=0)
+        #Frame que exibirá o menu de opções
         self.frMenu = ctk.CTkFrame(self.frMain, fg_color='#0077b6', corner_radius=0)
+        #Frame que exibirá as demais telas dos menus
         self.frContent = ctk.CTkFrame(self.frMain, fg_color='transparent', corner_radius=0)
         
         configBtMenu = {'font':("", 16), 'fg_color':'transparent', 'bg_color':'transparent', 
@@ -43,11 +51,13 @@ class LivroWindow(ctk.CTkFrame):
         self.btEdit.pack(side="left", padx=0, ipady=5, ipadx=5, fill='x', expand=True)
         
         self.frContent.pack(fill='both', expand=True)
+        #Abre a tela contendo todos os livros armazenados no banco de dados
         self._loadListLivros()
     
     def _loadListLivros(self):
+        #Limpa as possíveis telas já abertas no frContent
         self._cleanContentFrame()
-        
+        #Será exibido os livros contidos no banco de dados em forma de tabela, contendo um botão para excluir.
         self.frTableLivros = ctk.CTkFrame(self.frContent, fg_color="#ced4da", corner_radius=0)
         
         self.frTableLivros.grid_columnconfigure(0, weight=1)
@@ -73,20 +83,23 @@ class LivroWindow(ctk.CTkFrame):
         lbQuantDisponivel.grid(row=0, column=5)
     
     def _loadRegisterLivro(self):
-        
+        #Função responsável por limpar os dados dos entrys e combobox
         def cleanFields():
             self.entryTitulo.delete(0, 'end')
             self.entryQuantCopias.delete(0, 'end')
             self.entryQuantDisponivel.delete(0, 'end')
             self.cbAutor.set("")
             self.cbGenero.set("")
-           
-        def filterEstoqueEntry(event):
+
+        #Função que permite o usuário digitar apenas números nos entry quant. Disponível e de Copias
+        def filterOnlyNumberEntry(event, vb):
             vk = event.keysym
+            v = vb.get()
             w = event.widget
+            
             if vk != "BackSpace":
                 try:
-                    c = vk
+                    c = v[-1]
                     try:
                         c = int(c)
                     except ValueError:
@@ -94,6 +107,7 @@ class LivroWindow(ctk.CTkFrame):
                 except IndexError:
                     pass
             
+        #Função que realizará a consulta a tabela Autores e retornará todos os autores cadastrados
         def _loadAutores():
             try:
                 response = AutorController.getAllAutores()
@@ -104,40 +118,49 @@ class LivroWindow(ctk.CTkFrame):
             except Exception as e:
                 AlertWidget(self.root, "Error", "Erro ao tentar consultar autores", str(e))
 
+
         self._cleanContentFrame()
         self.frRegister = ctk.CTkFrame(self.frContent, fg_color='transparent')
         frLivroData = ctk.CTkFrame(self.frRegister, fg_color='transparent', border_color='black', border_width=1)
 
         frDataRow1 = ctk.CTkFrame(frLivroData, fg_color='transparent')
         frDataRow2 = ctk.CTkFrame(frLivroData, fg_color='transparent')
-        
+        frDataRow3 = ctk.CTkFrame(frLivroData, fg_color='transparent')
+
         frButtons = ctk.CTkFrame(self.frRegister, fg_color='transparent')
         
         configLabelData = {'text_color':'black', 'font':("", 15)}
         configEntryData = {'corner_radius':0, 'border_color':"grey", 'fg_color':'#ced4da', 'text_color':'black'}
         
         lbTitulo = ctk.CTkLabel(frDataRow1, text="Título: ", **configLabelData)
+        lbISBN = ctk.CTkLabel(frDataRow2, text="ISBN: ", **configLabelData)
         lbAutor = ctk.CTkLabel(frDataRow2, text="Autor: ", **configLabelData)
-        lbGenero = ctk.CTkLabel(frDataRow1, text="Gênero: ", **configLabelData)
-        lbQuantCopias = ctk.CTkLabel(frDataRow2, text="Quant. Copias: ", **configLabelData)
-        lbQuantDisponivel = ctk.CTkLabel(frDataRow2, text="Quant. Disponível: ", **configLabelData)
+        lbGenero = ctk.CTkLabel(frDataRow3, text="Gênero: ", **configLabelData)
+        lbQuantCopias = ctk.CTkLabel(frDataRow3, text="Quant. Copias: ", **configLabelData)
+        lbQuantDisponivel = ctk.CTkLabel(frDataRow3, text="Quant. Disponível: ", **configLabelData)
         
         _loadAutores()
 
+        vbQuantCopias = ctk.StringVar()
+        vbQuantDisponivel = ctk.StringVar()
+        vbISBN = ctk.StringVar()
+
         self.entryTitulo = ctk.CTkEntry(frDataRow1, **configEntryData)
+        self.entryISBN = ctk.CTkEntry(frDataRow2, textvariable=vbISBN, **configEntryData)
         self.cbAutor = ctk.CTkComboBox(frDataRow2, state="readonly", values=[autor.nome for autor in self.autores], **configEntryData)
-        self.cbGenero = ctk.CTkComboBox(frDataRow1, state="readonly", **configEntryData)
-        self.entryQuantCopias = ctk.CTkEntry(frDataRow2, width=40, **configEntryData)
-        self.entryQuantDisponivel = ctk.CTkEntry(frDataRow2, width=40,**configEntryData)
+        self.cbGenero = ctk.CTkComboBox(frDataRow3, state="readonly", **configEntryData)
+        self.entryQuantCopias = ctk.CTkEntry(frDataRow3, width=60, textvariable=vbQuantCopias, **configEntryData)
+        self.entryQuantDisponivel = ctk.CTkEntry(frDataRow3, width=60, textvariable=vbQuantDisponivel,**configEntryData)
         
         confButtonCad = {'fg_color': "#0077b6", 'hover_color': "#023e8a",
                          'text_color':"white", 'corner_radius': 0}
         
         self.btCadAutor = ctk.CTkButton(frDataRow2,text="+", width=30, command= self._openAutorGUI, **confButtonCad)
-        self.btCadGenero = ctk.CTkButton(frDataRow1, text="+", width=30, **confButtonCad)
+        self.btCadGenero = ctk.CTkButton(frDataRow3, text="+", width=30, **confButtonCad)
         
-        self.entryQuantCopias.bind('<KeyRelease>', filterEstoqueEntry)
-        self.entryQuantDisponivel.bind('<KeyRelease>', filterEstoqueEntry)
+        self.entryISBN.bind("<KeyRelease>", lambda event: filterOnlyNumberEntry(event, vbISBN))
+        self.entryQuantCopias.bind('<KeyRelease>', lambda event: filterOnlyNumberEntry(event, vbQuantCopias))
+        self.entryQuantDisponivel.bind('<KeyRelease>', lambda event: filterOnlyNumberEntry(event, vbQuantDisponivel))
         
         btRegister = ctk.CTkButton(frButtons, text="Cadastrar", **confButtonCad)
         btCleanFields = ctk.CTkButton(frButtons, text="Limpar Campos", **confButtonCad, command=cleanFields)
@@ -148,20 +171,22 @@ class LivroWindow(ctk.CTkFrame):
         
         frDataRow1.pack(fill='x', padx=5, pady=(5,0))
         frDataRow2.pack(fill='x', padx=5, pady=(0,5))
-
-        
+        frDataRow3.pack(fill='x', padx=5, pady=(0,5))    
+                
         lbTitulo.pack(side="left", padx=5, pady=10)
         self.entryTitulo.pack(side="left", expand=True, fill='x', pady=10)
-        lbGenero.pack(side="left", padx=5, pady=10)
-        self.cbGenero.pack(side="left", fill='x', pady=10, padx=(0,5))
-        self.btCadGenero.pack(side="left", pady=10, padx=(0,5))
+        lbISBN.pack(side="left", padx=5, pady=10)
+        self.entryISBN.pack(side="left", pady=10)
         lbAutor.pack(side="left", padx=5, pady=10)
         self.cbAutor.pack(side="left", fill='x', expand=True, pady=10, padx=(0,5))
         self.btCadAutor.pack(side="left", pady=10, padx=(0,5))
+        lbGenero.pack(side="left", padx=5, pady=10)
+        self.cbGenero.pack(side="left", fill='x', expand=True, pady=10, padx=(0,5))
+        self.btCadGenero.pack(side="left", pady=10, padx=(0,5))
         lbQuantCopias.pack(side="left", padx=(0,5), pady=10)
-        self.entryQuantCopias.pack(side="left", fill='x', pady=10, padx=(0,5))
+        self.entryQuantCopias.pack(side="left", pady=10, padx=(0,5))
         lbQuantDisponivel.pack(side="left", padx=(0,5), pady=10)
-        self.entryQuantDisponivel.pack(side="left",fill='x', pady=10, padx=(0,5))
+        self.entryQuantDisponivel.pack(side="left", pady=10, padx=(0,5))
         
         frButtons.pack(fill='x', padx=5, pady=10)
         btRegister.pack(side='right')
