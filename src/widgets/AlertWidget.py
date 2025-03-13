@@ -1,7 +1,7 @@
 import customtkinter as ctk
 
 class AlertWidget(ctk.CTkToplevel):
-    def __init__(self, master, typeAlert, title, message):
+    def __init__(self, master: ctk.CTk, typeAlert: str, title: str, message: str):
         super().__init__(master)
         self.lift()
         self.attributes("-topmost", True)
@@ -11,11 +11,11 @@ class AlertWidget(ctk.CTkToplevel):
         self._loadWidgets(typeAlert)
         self.grab_set()
 
-    def _configureWindow(self, typeAlert):
+    def _configureWindow(self, typeAlert: str):
         self.resizable(0,0)
         self.title(typeAlert)
 
-    def _createWidgets(self, title, message):
+    def _createWidgets(self, title: str, message: str):
         self.frMain = ctk.CTkFrame(self, fg_color='white', corner_radius=0, width=300)
         self.frOptions = ctk.CTkFrame(self.frMain, fg_color='transparent', corner_radius=0)
         
@@ -30,7 +30,7 @@ class AlertWidget(ctk.CTkToplevel):
         self.btOk = ctk.CTkButton(self.frOptions, text="Ok", command=lambda : self._closeAlert(False), **configBtOption)
         self.btCancel = ctk.CTkButton(self.frOptions, text="Cancelar", command=lambda: self._closeAlert(False), **configBtOption)
 
-    def _loadWidgets(self, typeAlert):
+    def _loadWidgets(self, typeAlert: str):
         self.frMain.pack(fill="both", expand=True)
         self.lbTitle.pack(fill="x")
         self.lbMessage.pack(fill="x")
@@ -42,7 +42,7 @@ class AlertWidget(ctk.CTkToplevel):
             self.btNo.pack(side="left", anchor="center")
             self.btCancel.pack(side="left", anchor="center")
 
-    def _closeAlert(self, response):
+    def _closeAlert(self, response: bool):
         self.userResponse = response
         self.destroy()
 
