@@ -1,10 +1,11 @@
 import customtkinter as ctk
 from functools import reduce
+from tkinter import Event
 
 class ClienteWindow(ctk.CTkFrame):
-    def __init__(self, master, root):
+    def __init__(self, master:ctk.CTkFrame, root:ctk.CTk):
         super().__init__(master)
-        self.root = root
+        self.root = root #Armazena uma referência a janela Raiz
         self._configWindow()
         self._createWidgets()
         self._loadWidgets()
@@ -76,11 +77,11 @@ class ClienteWindow(ctk.CTkFrame):
         lbEmail.grid(row=0, column=4)
     
     def _loadRegisterCliente(self):
-        def cleanFields(*fields):
+        def cleanFields(*fields): #Precisa ser alterado, se houve algum campo que não seja entry
             for f in fields:
                 f.delete(0, 'end')
             
-        def filterCpfEntry(event):
+        def filterCpfEntry(event: Event):
             vk = event.keysym
             w = event.widget
             if vk != "BackSpace":
@@ -102,7 +103,7 @@ class ClienteWindow(ctk.CTkFrame):
                 except IndexError:
                     pass
             
-        def filterTelefoneEntry(event):
+        def filterTelefoneEntry(event: Event):
             vk = event.keysym
             w = event.widget
             if vk != "BackSpace":
@@ -130,7 +131,7 @@ class ClienteWindow(ctk.CTkFrame):
                 except IndexError:
                     pass
         
-        def filterNumeroAddress(event):
+        def filterNumeroAddress(event: Event):
             vk = event.keysym
             w = event.widget
             
@@ -144,7 +145,7 @@ class ClienteWindow(ctk.CTkFrame):
                 except IndexError:
                     pass
         
-        def filterCepEntry(event):
+        def filterCepEntry(event: Event):
             vk = event.keysym
             w = event.widget
             if vk != "BackSpace":
@@ -163,7 +164,7 @@ class ClienteWindow(ctk.CTkFrame):
                 except IndexError:
                     pass
         
-        def filterEstadoEntry(event):
+        def filterEstadoEntry(event: Event):
             w = event.widget
             if len(w.get()>2):
                 w.delete(len(w.get()-1, 'end'))

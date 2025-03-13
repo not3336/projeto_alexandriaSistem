@@ -3,7 +3,7 @@ from controllers.AutorController import AutorController
 from widgets.AlertWidget import AlertWidget
 
 class AutorGUI(ctk.CTkToplevel):
-    def __init__(self, master):
+    def __init__(self, master: ctk.CTk):
         super().__init__(master)
         self.root = master
         self.autores = []
